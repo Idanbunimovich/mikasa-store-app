@@ -124,7 +124,7 @@ class ShoppingCart extends React.Component{
         })
             .then(response => response.json())
             .then((res)=>{
-                console.log(this.state.id);
+
                 if(res === 'success') {
                     this.props.load(this.state.basketball,this.state.volleyball,this.state.futsal,this.state.footy,this.state.soccer)
                     this.setState({isSubmit: 'true'});

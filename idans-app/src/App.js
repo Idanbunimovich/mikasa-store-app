@@ -69,9 +69,9 @@ class App extends Component {
       }
     componentDidMount() {
         const token = window.sessionStorage.getItem('token');
-        console.log(token);
+
         if (token!==null) {
-            console.log(token);
+
             fetch('http://localhost:3000/signin', {
                 method: 'POST',
                 headers: {
@@ -82,8 +82,7 @@ class App extends Component {
                 .then(response =>
                     response.json())
                 .then(data => {
-                    console.log(data)
-                    if (data && data.id) {
+                        if (data && data.id) {
                         fetch(`http://localhost:3000/profile/${data.id}`, {
                             method: 'GET',
                             headers: {
@@ -93,8 +92,6 @@ class App extends Component {
                         })
                             .then(response => response.json())
                             .then(user => {
-                                console.log(user);
-
                                 if (user && user.email) {
                                     this.loadUser(user)
                                     this.loggingIn()
@@ -120,7 +117,7 @@ class App extends Component {
                       <CardList  id = {this.state.user.id} load={this.loadNewAmount} isSignedIn ={this.state.isSignedIn}volleyball = {this.state.user.volleyball} soccer = {this.state.user.soccer}basketball = {this.state.user.basketball}footy = {this.state.user.footy}futsal = {this.state.user.futsal}/>
                   </div>);
               case 'allusers':
-                  console.log(this.state.allusers)
+
                       return (<div>
 
                       <AllUsers allusers={this.state.allusers}/>

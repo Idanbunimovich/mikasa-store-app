@@ -31,17 +31,7 @@ class CardList extends React.Component {
         let tmp = !this.state.isError
         this.setState({isError:tmp})
     }
-    fetchElemnt = () => {
-        var url = 'https://nba.sport5.co.il/';
-        fetch(url, {
-            method: 'GET',
-            headers:{
-                'X-Requested-With': 'XMLHttpRequest'
-            }
-        }).then(res => res.json())
-            .then(response => console.log('Success:', response))
-            .catch(error => console.error('Error:', error));
-    }
+    
     submitToShoppingCart = () => { fetch('http://localhost:3000/shoppingcart1', {
         method:'put',
         headers: {'Content-Type': 'application/json',
@@ -145,7 +135,7 @@ class CardList extends React.Component {
         this.setState({searchBox:event.target.value})
 
     render() {
-        console.log(this.fetchElemnt())
+
         return (
             <div className="parent">
 

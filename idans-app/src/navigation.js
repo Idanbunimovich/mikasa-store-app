@@ -4,8 +4,7 @@ import "./App.css";
 
 const Navigation = ({onRouteChange,isSignedIn,id}) => {
     if (isSignedIn && id.toString() !== '3') {
-        console.log(id);
-        return (
+            return (
 
             <ul className="flex f3  underline pa3 pointer list pl0 br3 ba b--black-10 ma0  shadow-5 center" >
                 <li className="dim" onClick={() => onRouteChange('home')}>ball shop</li>
