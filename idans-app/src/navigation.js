@@ -17,7 +17,7 @@ const Navigation = ({onRouteChange,isSignedIn,id}) => {
         );
 
     }
-    else if((isSignedIn===false)&&(id !== '3')){
+    else if(isSignedIn===false){
         return (
             <ul className="flex f3  underline pa3 pointer list pl0 br3 ba b--black-10 ma0  shadow-5 center">
                 <li className="dim" onClick={() => onRouteChange('home')}>ball shop</li>

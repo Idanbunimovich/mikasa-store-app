@@ -10,7 +10,6 @@ import Sports from "./Sports";
 import AboutMe from "./aboutMe";
 import ShoppingCart from "./ShoppingCart";
 import AllUsers from "./AllUsers";
-import readme from "./readme";
 import Readme from "./readme";
 const particlesOptions = {
       particles: {
@@ -46,7 +45,8 @@ class App extends Component {
 
             this.state = {
                   route: 'aboutme',
-                  isJustgGotIn:true,
+                  isSignedIn: false,
+                  isJustgGotIn:false,
                   allusers:'',
                   user: {
                         id: '',
@@ -170,7 +170,7 @@ class App extends Component {
                     .then(response => response.json())
                     .then(response => {
                         this.setState({allusers: response},()=>this.setState({route: route}))
-                    }).catch(console.log);
+                    }).catch(err => console.log("yeah"));
             }
 
             else{
