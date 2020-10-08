@@ -32,7 +32,7 @@ class Signin extends React.Component {
             .then(response => response.json())
             .then(data => { console.log(data)
                 if (data && data.success === "true") {
-                    
+
                     this.saveAuthTokenInSessions(data.token)
                     this.props.loadUser(data.user)
                     this.props.loggingIn();

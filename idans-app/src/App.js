@@ -158,6 +158,17 @@ class App extends Component {
       onRouteChange = (route) => {
             if (route === 'signout') {
                   this.setState({isSignedIn: false,route:'aboutme'})
+                  const token = window.sessionStorage.getItem('token');
+                  fetch(`http://localhost:3000/signout/${this.state.user.id}`, {
+                      method: 'GET',
+                      headers: {
+                          'Content-Type': 'application/json',
+                          'Authorization': token
+                      }
+                   }).then(r => {
+                      window.sessionStorage.clear()
+                   });
+
             } else if(route === 'allusers') {
                 const token = window.sessionStorage.getItem('token');
                 fetch(`http://localhost:3000/allprofile/${this.state.user.id}`, {
