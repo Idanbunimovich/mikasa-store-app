@@ -165,7 +165,7 @@ class App extends Component {
                           'Content-Type': 'application/json',
                           'Authorization': token
                       }
-                   }).then(r => {
+                   }).then(() => {
                       window.sessionStorage.clear()
                    });
 
