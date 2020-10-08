@@ -31,6 +31,7 @@ app.get('/profile/:id',auth.requireAuth, (req, res) =>  signin.profile(req,res,d
 app.get('/allprofile/:id',auth.requireAuthAdmin, (req, res) =>  signin.allProfiles(req,res,db));
 app.post('/shoppingcart',auth.requireAuth, (req, res) => shoppingCart.handleShoppingCart(req,res,db));
 app.put('/shoppingcart1',auth.requireAuth, (req, res) => shoppingCart.handleShoppingCart2(req,res,db));
+app.get('/signout/:id',auth.requireAuth, (req, res) => signin.signout(req,res,db));
 
 
 app.listen(3000, () => {

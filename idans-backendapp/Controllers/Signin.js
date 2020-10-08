@@ -12,6 +12,8 @@ const signToken = (username) => {
 
 const setToken = (key, value) => Promise.resolve(redisClient.set(key, value));
 
+const delToken = (key) => Promise.resolve(redisClient.del(key));
+
 const createSession = (user) => {
     const { email, id } = user;
     const token = signToken(email);
@@ -67,7 +69,12 @@ const signinAuthentication = (db, bcrypt) => (req, res) => {
             .catch(err => res.status(400).json(err));
     }
 }
+const signouthandler = (req,res,db) => {
+    const { authorization } = req.headers;
+    console.log("3")
+    delToken(authorization).then(()=>res.json({message:"success"}))
 
+}
 const handleProfile = (req,res,db) => {
 const { id } = req.params;
 db.select('*').from('users').where({id})
@@ -95,5 +102,6 @@ module.exports = {
     profile: handleProfile,
     allProfiles:handleAllProfile,
     signinAuthentication: signinAuthentication,
-    redisClient: redisClient
+    redisClient: redisClient,
+    signout:signouthandler
 }

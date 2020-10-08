@@ -115,6 +115,30 @@ def shop2():
         return jsonify({'msg': "Error fetching data from PostgreSQL table"})
 
 
+@app.route("/signout/<id>", methods=['GET', 'POST', 'PUT'])
+def signout(id):
+    token = request.headers['Authorization']
+    ID = redisdb.get(token).decode('utf-8')
+    if not token or (id != ID):
+        return jsonify({'message': 'Token is missing!'}), 403
+
+    try:
+        check = 1
+        token2 = jwt.decode(token, app.config['SECRET_KEY'])
+        check = 2
+        redisdb.delete(token)
+
+
+
+    except:
+        if (check == 1):
+            return jsonify({'message': 'Token is invalid!'}), 403
+        else:
+            print("Error")
+            return jsonify({'msg': "Error decode"})
+    return jsonify({"message": 'success'})
+
+
 @app.route("/shoppingcart1", methods=['GET', 'POST', 'PUT'])
 @token_required
 def shop():
@@ -125,7 +149,7 @@ def shop():
         footy = request.get_json().get('footy')
         volleyball = request.get_json().get('volleyball')
         basketball = request.get_json().get('basketball')
-        print(id,soccer,futsal)
+        print(id, soccer, futsal)
         postgreSQL_update_Query = "update users set basketball=%s, volleyball=%s, futsal=%s, footy=%s, soccer=%s where id=%s"
         cursor.execute(postgreSQL_update_Query, (basketball, volleyball, futsal, footy, soccer, id))
         con.commit()
