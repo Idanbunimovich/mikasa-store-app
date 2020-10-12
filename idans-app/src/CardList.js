@@ -131,8 +131,11 @@ class CardList extends React.Component {
 
 
 
-    onSearchboxChange = (event) =>
-        this.setState({searchBox:event.target.value})
+    onSearchboxChange = (event) => {
+        this.setState({searchBox: event.target.value})
+        console.log("hi")
+
+    }
 
     render() {
 
@@ -147,7 +150,7 @@ class CardList extends React.Component {
                         className ='pa3 ba b--green  bg-lightest-blue'
                         type='search'
                         placeholder='search balls'
-                        onChange ={()=>this.onSearchboxChange}/>
+                        onChange ={this.onSearchboxChange}/>
                 </div>
                 {"basketball".includes(this.state.searchBox) ?
                     <div className="zone">
