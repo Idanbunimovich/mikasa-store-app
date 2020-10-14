@@ -75,7 +75,7 @@ class App extends Component {
         const email = window.localStorage.getItem('email');
         const password = window.localStorage.getItem('password');
         if(password && email){
-            this.setState(Object.assign(this.state.user,{email:email,password:password}))
+            this.setState(Object.assign(this.state.user,{email:email}))
         }
 
         if (token!==undefined&&token!==null) {
@@ -102,7 +102,7 @@ class App extends Component {
                             .then(user => {
                                 if (user && user.email) {
                                     this.loadUser(user)
-                                    this.loggingIn(user.id)
+                                    let message = this.loggingIn(user.id)
                                 }
                             })
                     }
@@ -133,7 +133,7 @@ class App extends Component {
 
               case "signin":
                   return(
-                  <Signin loadUser={this.loadUser} onRouteChange={this.onRouteChange} loggingIn ={this.loggingIn} password = {this.state.password} email = {this.state.email}/>);
+                  <Signin loadUser={this.loadUser} onRouteChange={this.onRouteChange} loggingIn ={this.loggingIn} password = {this.state.user.password} email = {this.state.user.email}/>);
 
               case "register":
                   return(
@@ -164,7 +164,7 @@ class App extends Component {
           try {
               await this.setState({isSignedIn: true})
               const token = window.localStorage.getItem('token');
-              await fetch(`http://localhost:3000/signin/`, {
+              let result = await fetch(`http://localhost:3000/signin/`, {
                   method: 'PUT',
                   headers: {
                       'Content-Type': 'application/json',
@@ -175,6 +175,8 @@ class App extends Component {
                       isloggedin: this.state.isSignedIn
                   })
               })
+              return result
+
 
           }
           catch (e) {

@@ -6,6 +6,8 @@ import redis
 import jwt
 import datetime
 from flask_cors import CORS
+import sys
+import os
 
 redisdb = redis.Redis(host="127.0.0.1", port=6379)
 app = Flask(__name__)
@@ -68,19 +70,37 @@ def hello():
         return jsonify({'msg': "Error fetching data from PostgreSQL table"})
 
 
+@app.route("/signin", methods=['PUT'])
+def signin2():
+    try:
+
+        id = request.get_json().get('id')
+        print(id, "shmulik")
+        postgreSQL_update_Query = "update users set isloggedin=%s where id=%s"
+        cursor.execute(postgreSQL_update_Query, (True, id))
+        con.commit()
+        return jsonify("success")
+
+    except:
+        print("yeah")
+
+
 @app.route("/signin", methods=['GET', 'POST'])
 def signin():
     try:
+        token = request.headers['Authorization']
+      
         password = request.get_json().get('password')
         email = request.get_json().get('email')
-
+        print(email, "shmulik")
         postgreSQL_select_Query = "select * from login where email = %s"
-        cursor.execute(postgreSQL_select_Query, (email,))
+        cursor.execute(postgreSQL_select_Query, f"{email}")
         row = cursor.fetchall()[0]
+        print(row)
         if row[2] != email or not bcrypt.check_password_hash(row[1], password):
             return jsonify("incorrect form submission")
         postgreSQL_select_Query = "select * from users where email = %s"
-        cursor.execute(postgreSQL_select_Query, (email,))
+        cursor.execute(postgreSQL_select_Query, f"{email}")
         row = cursor.fetchall()[0]
         payload = {'email': f'{email}', 'exp': datetime.datetime.utcnow() + datetime.timedelta(seconds=3600)}
         token = jwt.encode(payload, app.config['SECRET_KEY'])
@@ -92,9 +112,11 @@ def signin():
         resp = jsonify(total)
         resp.status_code = 200
         return resp
-    except(Exception, psycopg2.Error) as error:
-        print("Error fetching data from PostgreSQL table", error)
-        return jsonify({'msg': "Error fetching data from PostgreSQL table"})
+    except Exception as e:
+        exc_type, exc_obj, exc_tb = sys.exc_info()
+        fname = os.path.split(exc_tb.tb_frame.f_code.co_filename)[1]
+        print(exc_type, fname, exc_tb.tb_lineno)
+        return jsonify("error")
 
 
 @app.route("/shoppingcart", methods=['GET', 'POST'])
@@ -110,9 +132,10 @@ def shop2():
         resp = jsonify(user)
         resp.status_code = 200
         return resp
-    except(Exception, psycopg2.Error) as error:
-        print("Error fetching data from PostgreSQL table", error)
-        return jsonify({'msg': "Error fetching data from PostgreSQL table"})
+    except Exception as e:
+        exc_type, exc_obj, exc_tb = sys.exc_info()
+        fname = os.path.split(exc_tb.tb_frame.f_code.co_filename)[1]
+        print(exc_type, fname, exc_tb.tb_lineno)
 
 
 @app.route("/signout/<id>", methods=['GET', 'POST', 'PUT'])
@@ -169,7 +192,7 @@ def oneuser(id):
     ID = redisdb.get(token).decode('utf-8')
     print(ID)
     if not token or (id != ID):
-        return jsonify({'message': 'Token is missing!'}), 403
+        return jsonify({'message': 'Token is missing!'}), 404
 
     try:
         check = 1
@@ -179,6 +202,7 @@ def oneuser(id):
         postgreSQL_select_Query = "select * from users where id = %s"
         cursor.execute(postgreSQL_select_Query, f"{id}")
         row = cursor.fetchall()[0]
+        print(row)
         user = {"id": f"{row[0]}", "name": f"{row[1]}", "email": f"{row[2]}", "basketball": f"{row[3]}",
                 "futsal": f"{row[4]}", "footy": f"{row[5]}", "soccer": f"{row[6]}", "volleyball": f"{row[7]}"}
 
