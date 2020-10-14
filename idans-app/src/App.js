@@ -46,12 +46,12 @@ class App extends Component {
             this.state = {
                   route: 'aboutme',
                   isSignedIn: false,
-                  isJustgGotIn:false,
                   allusers:'',
                   user: {
                         id: '',
                         name: '',
                         email: '',
+                      remember:false,
                       basketball:'',
                       volleyball:'',
                       soccer:'',
@@ -67,10 +67,18 @@ class App extends Component {
             this.loadUser=this.loadUser.bind(this);
             this.loggingIn=this.loggingIn.bind(this);*/
       }
-    componentDidMount() {
-        const token = window.sessionStorage.getItem('token');
 
-        if (token!==null) {
+
+
+    componentDidMount() {
+        const token = window.localStorage.getItem('token');
+        const email = window.localStorage.getItem('email');
+        const password = window.localStorage.getItem('password');
+        if(password && email){
+            this.setState(Object.assign(this.state.user,{email:email,password:password}))
+        }
+
+        if (token!==undefined&&token!==null) {
 
             fetch('http://localhost:3000/signin', {
                 method: 'POST',
@@ -94,7 +102,7 @@ class App extends Component {
                             .then(user => {
                                 if (user && user.email) {
                                     this.loadUser(user)
-                                    this.loggingIn()
+                                    this.loggingIn(user.id)
                                 }
                             })
                     }
@@ -125,7 +133,7 @@ class App extends Component {
 
               case "signin":
                   return(
-                  <Signin loadUser={this.loadUser} onRouteChange={this.onRouteChange} loggingIn ={this.loggingIn}/>);
+                  <Signin loadUser={this.loadUser} onRouteChange={this.onRouteChange} loggingIn ={this.loggingIn} password = {this.state.password} email = {this.state.email}/>);
 
               case "register":
                   return(
@@ -152,25 +160,49 @@ class App extends Component {
 
           }
       }
-      loggingIn = () => {
-          this.setState({isSignedIn: true})
+      loggingIn = async (id) => {
+          try {
+              await this.setState({isSignedIn: true})
+              const token = window.localStorage.getItem('token');
+              await fetch(`http://localhost:3000/signin/`, {
+                  method: 'PUT',
+                  headers: {
+                      'Content-Type': 'application/json',
+                      'Authorization': token
+                  },
+                  body: JSON.stringify({
+                      id: id,
+                      isloggedin: this.state.isSignedIn
+                  })
+              })
+
+          }
+          catch (e) {
+              console.log(e)
+          }
+
+
       }
       onRouteChange = (route) => {
             if (route === 'signout') {
                   this.setState({isSignedIn: false,route:'aboutme'})
-                  const token = window.sessionStorage.getItem('token');
-                  fetch(`http://localhost:3000/signout/${this.state.user.id}`, {
-                      method: 'GET',
+                  const token = window.localStorage.getItem('token');
+                  fetch(`http://localhost:3000/signout`, {
+                      method: 'POST',
                       headers: {
                           'Content-Type': 'application/json',
                           'Authorization': token
-                      }
+                      },
+                      body: JSON.stringify({
+                          id: this.state.user.id,
+                          isloggedin: this.state.isSignedIn
+                      })
                    }).then(() => {
-                      window.sessionStorage.clear()
+                      window.localStorage.removeItem(token)
                    });
 
             } else if(route === 'allusers') {
-                const token = window.sessionStorage.getItem('token');
+                const token = window.localStorage.getItem('token');
                 fetch(`http://localhost:3000/allprofile/${this.state.user.id}`, {
                     method: 'GET',
                     headers: {
@@ -199,6 +231,7 @@ class App extends Component {
                       id: data.id,
                       name: data.name,
                       email: data.email,
+                      remember:data.remember,
                       basketball: data.basketball,
                       volleyball: data.volleyball,
                       soccer: data.soccer,

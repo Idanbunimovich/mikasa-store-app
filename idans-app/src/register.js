@@ -6,7 +6,8 @@ class Register extends React.Component {
         this.state = {
             email: '',
             password: '',
-            name: ''
+            name: '',
+            remember:false
         }
     }
 
@@ -18,21 +19,32 @@ class Register extends React.Component {
         this.setState({email: event.target.value})
     }
     saveAuthTokenInSessions = (token) => {
-        window.sessionStorage.setItem('token', token);
+        window.localStorage.setItem('token', token);
+    }
+    saveUserTokenInSessions = (email, password) => {
+        window.localStorage.setItem('email', email);
+        window.localStorage.setItem('password', password);
     }
 
     onPasswordChange = (event) => {
         this.setState({password: event.target.value})
     }
+    onChangeCheckbox = (event) => {
+        this.setState({signInRemember: event.target.checked})
+    }
 
     onSubmitSignIn = () => {
+        if(this.state.signInRemember){
+            this.saveUserTokenInSessions(this.state.email,this.state.password)
+        }
         fetch('http://localhost:3000/register', {
             method: 'post',
             headers: {'Content-Type': 'application/json'},
             body: JSON.stringify({
                 email: this.state.email,
                 password: this.state.password,
-                name: this.state.name
+                name: this.state.name,
+                remember : this.state.remember
             })
         })
             .then(response => response.json())
@@ -44,7 +56,8 @@ class Register extends React.Component {
                         headers: {'Content-Type': 'application/json'},
                         body: JSON.stringify({
                             email: this.state.email,
-                            password: this.state.password
+                            password: this.state.password,
+                            remember:this.state.remember
                         })
                     })
                         .then(response => response.json())
@@ -52,7 +65,7 @@ class Register extends React.Component {
                             if (data && data.success === "true") {
                                 this.saveAuthTokenInSessions(data.token)
                                 this.props.loadUser(data.user)
-                                this.props.loggingIn();
+                                this.props.loggingIn(data.userId);
                                 this.props.onRouteChange('home');
                             }
                         })
@@ -97,6 +110,14 @@ class Register extends React.Component {
                                     id="password"
                                     onChange={this.onPasswordChange}
                                 />
+                            </div>
+                            <div className="mv3 flex">
+                                <input type="checkbox" checked={this.state.remember}  onChange={this.onChangeCheckbox}
+                                       className="b"
+                                       name="rememberMe"
+                                       id="rememberMe"
+                                />
+                                <label>Remember me</label>
                             </div>
                         </fieldset>
                         <div className="">

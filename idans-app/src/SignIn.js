@@ -3,9 +3,19 @@ import React from 'react';
 class Signin extends React.Component {
     constructor(props) {
         super(props);
-        this.state = {
-            signInEmail: '',
-            signInPassword: ''
+        if(props.password !== '') {
+            this.state = {
+                signInEmail: props.email,
+                signInPassword: props.password,
+                signInRemember: false
+            }
+        }
+        else{
+            this.state = {
+                signInEmail: '',
+                signInPassword: '',
+                signInRemember: false
+            }
         }
     }
 
@@ -16,26 +26,42 @@ class Signin extends React.Component {
     onPasswordChange = (event) => {
         this.setState({signInPassword: event.target.value})
     }
+    onChangeCheckbox = (event) => {
+        this.setState({signInRemember: event.target.checked})
+    }
     saveAuthTokenInSessions = (token) => {
-        window.sessionStorage.setItem('token', token);
+        window.localStorage.setItem('token', token);
+    }
+    saveUserTokenInSessions = (email, password) => {
+        window.localStorage.setItem('email', email);
+        window.localStorage.setItem('password', password);
+    }
+    deleteUserTokenInSessions = () => {
+        window.localStorage.removeItem('email');
+        window.localStorage.removeItem('password');
     }
 
     onSubmitSignIn = () => {
+        if(this.state.signInRemember){
+            this.saveUserTokenInSessions(this.state.signInEmail,this.state.signInPassword)
+        }
+        if(this.state.signInRemember === false){
+            this.deleteUserTokenInSessions()
+        }
         fetch('http://localhost:3000/signin', {
             method: 'post',
             headers: {'Content-Type': 'application/json'},
             body: JSON.stringify({
                 email: this.state.signInEmail,
-                password: this.state.signInPassword
+                password: this.state.signInPassword,
             })
         })
             .then(response => response.json())
             .then(data => { console.log(data)
                 if (data && data.success === "true") {
-
                     this.saveAuthTokenInSessions(data.token)
                     this.props.loadUser(data.user)
-                    this.props.loggingIn();
+                    this.props.loggingIn(data.userId);
                     this.props.onRouteChange('home');
                 }
             })
@@ -43,7 +69,8 @@ class Signin extends React.Component {
     }
 
     render() {
-        const { onRouteChange } = this.props;
+        console.log(this.props.email)
+        const { onRouteChange } = this.props.onRouteChange;
         return (
             <article className="br3 ba b--black-10 mv4 w-100 w-50-m w-25-l mw6 shadow-5 center">
                 <main className="pa4 black-80">
@@ -57,6 +84,7 @@ class Signin extends React.Component {
                                     type="email"
                                     name="email-address"
                                     id="email-address"
+                                    value={this.state.signInEmail}
                                     onChange={this.onEmailChange}
                                 />
                             </div>
@@ -67,8 +95,17 @@ class Signin extends React.Component {
                                     type="password"
                                     name="password"
                                     id="password"
+                                    value={this.state.signInPassword}
                                     onChange={this.onPasswordChange}
                                 />
+                            </div>
+                            <div className="mv3 flex">
+                                    <input type="checkbox" checked={this.state.signInRemember}  onChange={this.onChangeCheckbox}
+                                    className="b"
+                                    name="rememberMe"
+                                    id="rememberMe"
+                                    />
+                                <label>Remember me</label>
                             </div>
                         </fieldset>
                         <div className="">

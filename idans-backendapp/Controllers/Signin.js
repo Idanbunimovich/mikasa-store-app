@@ -69,12 +69,7 @@ const signinAuthentication = (db, bcrypt) => (req, res) => {
             .catch(err => res.status(400).json(err));
     }
 }
-const signouthandler = (req,res,db) => {
-    const { authorization } = req.headers;
-    console.log("3")
-    delToken(authorization).then(()=>res.json({message:"success"}))
 
-}
 const handleProfile = (req,res,db) => {
 const { id } = req.params;
 db.select('*').from('users').where({id})
@@ -86,6 +81,26 @@ db.select('*').from('users').where({id})
         }
     })
     .catch(err => res.status(400).json('error getting user'))
+}
+const signedin = (req,res,db) => {
+    const {id } = req.body;
+    db('users')
+        .where({id: id})
+        .update({isloggedin: true})
+        .then(() => {
+            res.json("success");
+        }).catch(err => res.status(400).json('unable to get entries'))
+}
+const signout = (req,res,db) => {
+    const {id} = req.body;
+    const { authorization } = req.headers;
+    delToken(authorization).then(()=> { db('users')
+        .where({id: id})
+        .update({isloggedin: false})
+        .then(() => {
+            res.json("success");
+        })
+}).catch(err => res.status(400).json('unable to get entries'))
 }
 const handleAllProfile = (req,res,db) => {
     db.select().from('users')
@@ -103,5 +118,6 @@ module.exports = {
     allProfiles:handleAllProfile,
     signinAuthentication: signinAuthentication,
     redisClient: redisClient,
-    signout:signouthandler
+    signout:signout,
+    signedin:signedin
 }

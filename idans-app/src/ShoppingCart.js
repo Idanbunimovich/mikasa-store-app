@@ -112,7 +112,7 @@ class ShoppingCart extends React.Component{
         fetch('http://localhost:3000/shoppingcart1', {
             method:'put',
             headers: {'Content-Type': 'application/json',
-                'Authorization': window.sessionStorage.getItem('token')},
+                'Authorization': window.localStorage.getItem('token')},
             body: JSON.stringify({
                 id:this.state.id,
                 basketball: this.state.basketball,

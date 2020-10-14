@@ -26,12 +26,13 @@ app.use(bodyParser.json());
 
 
 app.post('/signin', signin.signinAuthentication(db, bcrypt));
+app.put('/signin', auth.requireAuth, (req, res) =>  signin.signedin(req,res,db));
 app.post('/register', (req, res) => register.handleRegister(req, res, db, bcrypt));
 app.get('/profile/:id',auth.requireAuth, (req, res) =>  signin.profile(req,res,db));
 app.get('/allprofile/:id',auth.requireAuthAdmin, (req, res) =>  signin.allProfiles(req,res,db));
 app.post('/shoppingcart',auth.requireAuth, (req, res) => shoppingCart.handleShoppingCart(req,res,db));
 app.put('/shoppingcart1',auth.requireAuth, (req, res) => shoppingCart.handleShoppingCart2(req,res,db));
-app.get('/signout/:id',auth.requireAuth, (req, res) => signin.signout(req,res,db));
+app.post('/signout',auth.requireAuth, (req, res) => signin.signout(req,res,db));
 
 
 app.listen(3000, () => {
