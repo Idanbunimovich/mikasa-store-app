@@ -133,7 +133,7 @@ class App extends Component {
 
               case "signin":
                   return(
-                  <Signin loadUser={this.loadUser} onRouteChange={this.onRouteChange} loggingIn ={this.loggingIn} password = {this.state.user.password} email = {this.state.user.email}/>);
+                  <Signin loadUser={this.loadUser} onRouteChange={this.onRouteChange} loggingIn ={this.loggingIn} email = {this.state.user.email}/>);
 
               case "register":
                   return(

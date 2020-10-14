@@ -3,7 +3,7 @@ import React from 'react';
 class Signin extends React.Component {
     constructor(props) {
         super(props);
-        if(props.password !== '') {
+        if(props.email !== '') {
             this.state = {
                 signInEmail: props.email,
                 signInPassword: window.localStorage.getItem('password'),
@@ -42,7 +42,6 @@ class Signin extends React.Component {
     }
 
     onSubmitSignIn = () => {
-        console.log(window.localStorage.getItem('email'))
         if(this.state.signInRemember){
             this.saveUserTokenInSessions(this.state.signInEmail,this.state.signInPassword)
         }
@@ -70,7 +69,6 @@ class Signin extends React.Component {
     }
 
     render() {
-        console.log(this.props)
         const { onRouteChange } = this.props.onRouteChange;
         return (
             <article className="br3 ba b--black-10 mv4 w-100 w-50-m w-25-l mw6 shadow-5 center">

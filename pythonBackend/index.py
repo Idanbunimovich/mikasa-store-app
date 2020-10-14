@@ -73,7 +73,6 @@ def hello():
 @app.route("/signin", methods=['PUT'])
 def signin2():
     try:
-
         id = request.get_json().get('id')
         print(id, "shmulik")
         postgreSQL_update_Query = "update users set isloggedin=%s where id=%s"
@@ -81,41 +80,49 @@ def signin2():
         con.commit()
         return jsonify("success")
 
-    except:
-        print("yeah")
+
+    except Exception as e:
+        exc_type, exc_obj, exc_tb = sys.exc_info()
+        fname = os.path.split(exc_tb.tb_frame.f_code.co_filename)[1]
+        print(sys.exc_info(), fname, exc_tb.tb_lineno)
+        return jsonify("error")
 
 
 @app.route("/signin", methods=['GET', 'POST'])
 def signin():
     try:
         token = request.headers['Authorization']
-      
-        password = request.get_json().get('password')
-        email = request.get_json().get('email')
-        print(email, "shmulik")
-        postgreSQL_select_Query = "select * from login where email = %s"
-        cursor.execute(postgreSQL_select_Query, f"{email}")
-        row = cursor.fetchall()[0]
-        print(row)
-        if row[2] != email or not bcrypt.check_password_hash(row[1], password):
-            return jsonify("incorrect form submission")
+        print(token)
+        if token is not None:
+            id = redisdb.get(token).decode('utf-8')
+            postgreSQL_select_Query = "select * from login where id = %s"
+            cursor.execute(postgreSQL_select_Query, [id])
+            row = cursor.fetchall()[0]
+        else:
+            password = request.get_json().get('password')
+            email = request.get_json().get('email')
+            postgreSQL_select_Query = "select * from login where email = %s"
+            cursor.execute(postgreSQL_select_Query, [email])
+            row = cursor.fetchall()[0]
+            if row[2] != email or not bcrypt.check_password_hash(row[1], password):
+                return jsonify("incorrect form submission")
+            payload = {'email': f'{email}', 'exp': datetime.datetime.utcnow() + datetime.timedelta(seconds=3600)}
+            token = jwt.encode(payload, app.config['SECRET_KEY'])
+            redisdb.set(token.decode('UTF-8'), row[0])
         postgreSQL_select_Query = "select * from users where email = %s"
-        cursor.execute(postgreSQL_select_Query, f"{email}")
+        cursor.execute(postgreSQL_select_Query, [email])
         row = cursor.fetchall()[0]
-        payload = {'email': f'{email}', 'exp': datetime.datetime.utcnow() + datetime.timedelta(seconds=3600)}
-        token = jwt.encode(payload, app.config['SECRET_KEY'])
-        redisdb.set(token.decode('UTF-8'), row[0])
         user = {"id": f"{row[0]}", "name": f"{row[1]}", "email": f"{row[2]}", "basketball": f"{row[3]}",
-                "futsal": f"{row[4]}", "footy": f"{row[5]}", "soccer": f"{row[6]}", "volleyball": f"{row[7]}"}
+                "futsal": f"{row[4]}", "footy": f"{row[5]}", "soccer": f"{row[6]}", "volleyball": f"{row[7]}",
+                "isloggedin": f"{row[8]}"}
         total = {"success": "true", "token": token.decode('UTF-8'), "user": user, 'userId': f"{row[0]}"}
-
         resp = jsonify(total)
         resp.status_code = 200
         return resp
     except Exception as e:
         exc_type, exc_obj, exc_tb = sys.exc_info()
         fname = os.path.split(exc_tb.tb_frame.f_code.co_filename)[1]
-        print(exc_type, fname, exc_tb.tb_lineno)
+        print(sys.exc_info(), fname, exc_tb.tb_lineno)
         return jsonify("error")
 
 
@@ -138,9 +145,10 @@ def shop2():
         print(exc_type, fname, exc_tb.tb_lineno)
 
 
-@app.route("/signout/<id>", methods=['GET', 'POST', 'PUT'])
-def signout(id):
+@app.route("/signout", methods=['GET', 'POST', 'PUT'])
+def signout():
     token = request.headers['Authorization']
+    id = request.get_json().get('id')
     ID = redisdb.get(token).decode('utf-8')
     if not token or (id != ID):
         return jsonify({'message': 'Token is missing!'}), 403
@@ -150,8 +158,10 @@ def signout(id):
         token2 = jwt.decode(token, app.config['SECRET_KEY'])
         check = 2
         redisdb.delete(token)
-
-
+        postgreSQL_update_Query = "update users set isloggedin=%s where id=%s"
+        cursor.execute(postgreSQL_update_Query, (False, id))
+        con.commit()
+        return jsonify("success")
 
     except:
         if (check == 1):
@@ -159,7 +169,6 @@ def signout(id):
         else:
             print("Error")
             return jsonify({'msg': "Error decode"})
-    return jsonify({"message": 'success'})
 
 
 @app.route("/shoppingcart1", methods=['GET', 'POST', 'PUT'])
@@ -180,9 +189,11 @@ def shop():
         resp = jsonify(message)
         resp.status_code = 200
         return resp
-    except(Exception, psycopg2.Error) as error:
-        print("Error fetching data from PostgreSQL table", error)
-        return jsonify({'msg': "Error fetching data from PostgreSQL table"})
+    except Exception as e:
+        exc_type, exc_obj, exc_tb = sys.exc_info()
+        fname = os.path.split(exc_tb.tb_frame.f_code.co_filename)[1]
+        print(sys.exc_info(), fname, exc_tb.tb_lineno)
+        return jsonify("error")
 
 
 @app.route("/profile/<id>", methods=['GET', 'POST'])
@@ -208,12 +219,16 @@ def oneuser(id):
 
         return jsonify(user)
 
-    except(Exception, psycopg2.Error) as error:
+
+    except Exception as e:
+        exc_type, exc_obj, exc_tb = sys.exc_info()
+        fname = os.path.split(exc_tb.tb_frame.f_code.co_filename)[1]
+        print(sys.exc_info(), fname, exc_tb.tb_lineno)
         if (check == 1):
             return jsonify({'message': 'Token is invalid!'}), 403
         else:
             print("Error fetching data from PostgreSQL table", error)
-            return jsonify({'msg': "Error fetching data from PostgreSQL table"})
+            return jsonify("error")
 
 
 @app.route("/allprofile/<id>", methods=['GET', 'POST'])
@@ -231,7 +246,7 @@ def allusers(id):
         resault = []
         for row in array:
             user = {"id": f"{row[0]}", "name": f"{row[1]}", "email": f"{row[2]}", "basketball": f"{row[3]}",
-                    "volleyball": f"{row[4]}", "footy": f"{row[5]}", "soccer": f"{row[6]}", "futsal": f"{row[7]}"}
+                    "volleyball": f"{row[4]}", "footy": f"{row[5]}", "soccer": f"{row[6]}", "futsal": f"{row[7]}", "isloggedin": f"{row[8]}"}
             resault.append(user)
         return jsonify(resault)
 
