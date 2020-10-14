@@ -3,12 +3,13 @@ import React from "react";
 class User extends React.Component{
 
     render() {
-        const {id,name,email,basketball,futsal,footy,soccer,volleyball} = this.props
+        const {id,name,email,basketball,futsal,footy,soccer,volleyball,isloggedin} = this.props
         return(
             <tr className="stripe-dark">
                 <td className="pa3">{id}</td>
                 <td className="pa3">{name}</td>
                 <td className="pa3">{email}</td>
+                <td className="pa3">{isloggedin.toString()}</td>
                 <td className="pa3">{basketball}</td>
                 <td className="pa3">{futsal}</td>
                 <td className="pa3">{footy}</td>
