@@ -91,9 +91,8 @@ def signin2():
 @app.route("/signin", methods=['GET', 'POST'])
 def signin():
     try:
-        token = request.headers['Authorization']
-        print(token)
-        if token is not None:
+        if 'Authorization' in request.headers:
+            token = request.headers['Authorization']
             id = redisdb.get(token).decode('utf-8')
             postgreSQL_select_Query = "select * from login where id = %s"
             cursor.execute(postgreSQL_select_Query, [id])

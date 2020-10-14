@@ -133,7 +133,7 @@ class CardList extends React.Component {
 
     onSearchboxChange = (event) => {
         this.setState({searchBox: event.target.value})
-        console.log("hi")
+
 
     }
 

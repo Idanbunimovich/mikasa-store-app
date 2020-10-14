@@ -164,8 +164,8 @@ class App extends Component {
           try {
               await this.setState({isSignedIn: true})
               const token = window.localStorage.getItem('token');
-              let result = await fetch(`http://localhost:3000/signin/`, {
-                  method: 'PUT',
+              let result = await fetch(`http://localhost:3000/signin`, {
+                  method: 'put',
                   headers: {
                       'Content-Type': 'application/json',
                       'Authorization': token
@@ -175,7 +175,8 @@ class App extends Component {
                       isloggedin: this.state.isSignedIn
                   })
               })
-              return result
+              let result2 = await result.json()
+              return result2;
 
 
           }

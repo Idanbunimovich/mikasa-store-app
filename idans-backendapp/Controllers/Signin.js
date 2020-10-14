@@ -88,6 +88,7 @@ const signedin = (req,res,db) => {
         .where({id: id})
         .update({isloggedin: true})
         .then(() => {
+            console.log("hi")
             res.json("success");
         }).catch(err => res.status(400).json('unable to get entries'))
 }
