@@ -11,6 +11,7 @@ import AboutMe from "./aboutMe";
 import ShoppingCart from "./ShoppingCart";
 import AllUsers from "./AllUsers";
 import Readme from "./readme";
+import ErrorBoundry from "./ErrorBoundry";
 const particlesOptions = {
       particles: {
 
@@ -262,7 +263,9 @@ class App extends Component {
     <div className="App">
           <Particles className="particles"  params={particlesOptions}  />
         <Navigation classsName='flex' onRouteChange={this.onRouteChange} isSignedIn={this.state.isSignedIn} id={this.state.user.id}/>
+        <ErrorBoundry>
         {this.getComponent()}
+        </ErrorBoundry>
 
     </div>
             );

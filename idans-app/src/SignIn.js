@@ -1,4 +1,5 @@
 import React from 'react';
+import Error from "./error";
 
 class Signin extends React.Component {
     constructor(props) {
@@ -7,16 +8,23 @@ class Signin extends React.Component {
             this.state = {
                 signInEmail: props.email,
                 signInPassword: window.localStorage.getItem('password'),
-                signInRemember: false
+                signInRemember: false,
+                isError:false,
+
             }
         }
         else{
             this.state = {
                 signInEmail: '',
                 signInPassword: '',
-                signInRemember: false
+                signInRemember: false,
+                isError:false
             }
         }
+    }
+    changeErrorState = ()=>{
+        let tmp = !this.state.isError
+        this.setState({isError:tmp})
     }
 
     onEmailChange = (event) => {
@@ -64,6 +72,9 @@ class Signin extends React.Component {
                     this.props.loggingIn(data.userId);
                     this.props.onRouteChange('home');
                 }
+                else{
+                    this.setState({isError:true})
+                }
             })
             .catch(err=>console.log("hi"))
     }
@@ -71,7 +82,11 @@ class Signin extends React.Component {
     render() {
         const { onRouteChange } = this.props.onRouteChange;
         return (
-            <article className="br3 ba b--black-10 mv4 w-100 w-50-m w-25-l mw6 shadow-5 center">
+            <div>
+                {this.state.isError === true ? <div className='zone'>
+                    <Error change={this.changeErrorState} isError={this.state.isError} errorMessage={"invalid credentials"}/>
+                </div>:null}
+              <article className="br3 ba b--black-10 mv4 w-100 w-50-m w-25-l mw6 shadow-5 center">
                 <main className="pa4 black-80">
                     <div className="measure">
                         <fieldset id="sign_up" className="ba b--transparent ph0 mh0">
@@ -121,6 +136,7 @@ class Signin extends React.Component {
                     </div>
                 </main>
             </article>
+            </div>
         );
     }
 }
