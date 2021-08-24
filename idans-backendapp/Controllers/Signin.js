@@ -1,9 +1,8 @@
 const jwt = require('jsonwebtoken');
 
 // Redis Setup
-const redis = require('redis');
-// You will want to update your host to the proper address in production
-const redisClient = redis.createClient({host: '127.0.0.1'});
+const {redisClient} = require('../server')
+console.log(redisClient)
 
 const signToken = (username) => {
     const jwtPayload = { username };
@@ -14,14 +13,12 @@ const setToken = (key, value) => Promise.resolve(redisClient.set(key, value));
 
 const delToken = (key) => Promise.resolve(redisClient.del(key));
 
-const createSession = (user) => {
+const createSession = async (user) => {
     const { email, id } = user;
     const token = signToken(email);
-    return setToken(token, id)
-        .then(() => {
-            return { success: 'true', userId: id, token, user }
-        })
-        .catch(console.log);
+    console.log(token)
+    await setToken(token, id)
+    return { success: 'true', userId: id, token, user }
 };
 
 const handleSignin = (db, bcrypt, req, res) => {
@@ -58,17 +55,27 @@ const getAuthTokenId = (req, res) => {
 
 const signinAuthentication = (db, bcrypt) => (req, res) => {
     const {authorization} = req.headers;
+    console.log(authorization)
     if (authorization !== null && authorization !== undefined) {
         getAuthTokenId(req, res)
 
     } else {
         handleSignin(db, bcrypt, req, res)
-            .then(data =>
-                data.id && data.email ? createSession(data) : Promise.reject(data))
-            .then(session => res.json(session))
-            .catch(err => res.status(400).json(err));
+            .then(data => {
+                    console.log({id: data.id, email: data.email})
+                    if (data.id && data.email) {
+                        console.log('hi')
+                        createSession(data).then(session => {
+                            console.log({session})
+                            res.json(session)
+                        })
+
+                    }
+                }
+            ).catch(err => res.status(400).json(err));
     }
 }
+
 
 const handleProfile = (req,res,db) => {
 const { id } = req.params;
@@ -114,11 +121,12 @@ const handleAllProfile = (req,res,db) => {
         })
         .catch(err => res.status(400).json('error getting user'))
 }
+
 module.exports = {
     profile: handleProfile,
     allProfiles:handleAllProfile,
     signinAuthentication: signinAuthentication,
-    redisClient: redisClient,
+
     signout:signout,
     signedin:signedin
 }

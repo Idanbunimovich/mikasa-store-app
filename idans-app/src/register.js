@@ -60,7 +60,10 @@ class Register extends React.Component {
                             remember:this.state.remember
                         })
                     })
-                        .then(response => response.json())
+                        .then(response => {
+                            console.log(response)
+                            return response.json()
+                        })
                         .then(data => {
                             if (data && data.success === "true") {
                                 this.saveAuthTokenInSessions(data.token)

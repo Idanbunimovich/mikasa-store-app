@@ -18,6 +18,6 @@ const handleShoppingCart2 = (req, res, db) => {
         .catch(err => res.status(400).json('unable to get entries'))
 }
 module.exports = module.exports = {
-    handleShoppingCart: handleShoppingCart,
-    handleShoppingCart2: handleShoppingCart2
+    handleShoppingCart,
+    handleShoppingCart2
 }
